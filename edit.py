@@ -9,6 +9,8 @@
 # /set plugins.var.python.edit.run_externally "false"
 #
 # History:
+# 20221113WF
+# Version 1.0.3: /edit arguments written to file. file is .md
 # 10-18-2015
 # Version 1.0.2: Add the ability to run the editor in a external terminal
 # Version 1.0.1: Add configurable editor key
@@ -20,8 +22,10 @@ import shlex
 import subprocess
 import weechat
 
+
 def xdg_cache_dir():
     return os.path.expanduser(os.environ.get("XDG_CACHE_HOME", "~/.cache/"))
+
 
 def weechat_cache_dir():
     cache_dir = os.path.join(xdg_cache_dir(), "weechat")
@@ -30,7 +34,7 @@ def weechat_cache_dir():
     return os.path.expanduser(os.environ.get("WEECHAT_HOME", "~/.weechat/"))
 
 
-PATH = os.path.join(weechat_cache_dir(), "message.txt")
+PATH = os.path.join(weechat_cache_dir(), "message.md")
 
 
 def editor_process_cb(data, command, return_code, out, err):
@@ -107,6 +111,7 @@ def edit(data, buf, args):
     run_externally = bool(run_externally)
 
     with open(PATH, "w+") as f:
+        f.write(args)
         f.write(weechat.buffer_get_string(buf, "input"))
 
     if run_externally:
@@ -118,7 +123,7 @@ def edit(data, buf, args):
 
 
 def main():
-    if not weechat.register("edit", "Keith Smiley", "1.0.0", "MIT",
+    if not weechat.register("edit", "Keith Smiley", "1.0.3", "MIT",
                             "Open your $EDITOR to compose a message", "", ""):
         return weechat.WEECHAT_RC_ERROR
 
