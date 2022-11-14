@@ -7,9 +7,11 @@
 # /set plugins.var.python.edit.editor "vim -f"
 # /set plugins.var.python.edit.terminal "xterm"
 # /set plugins.var.python.edit.run_externally "false"
+# /set plugins.var.python.edit.paste_file "/path/to/external_clipboard.txt"
 #
 # History:
 # 20221113WF
+# Version 1.1.0: paste_file opt. '/edit fc' msg.md from paste_file as code blk
 # Version 1.0.3: /edit arguments written to file. file is .md
 # 10-18-2015
 # Version 1.0.2: Add the ability to run the editor in a external terminal
@@ -21,6 +23,9 @@ import os.path
 import shlex
 import subprocess
 import weechat
+
+
+__VERSION__ = "1.1.0"
 
 
 def xdg_cache_dir():
@@ -110,8 +115,23 @@ def edit(data, buf, args):
     )
     run_externally = bool(run_externally)
 
+    # paste from file.
+    # /edit f => default content pulled from paste_file
+    # /edit fc => as above but with ``` code blocks
+    # if not f or fc, use whatever was provided as file contents
+    # /edit hello world => message.md will start with "hello world"
+    if args in ["fc", "f"]:
+        file = (weechat.config_get_plugin("paste_file") or
+                "/mnt/storage/dl/slack/upload/upload.txt")
+        with open(file, "r") as f:
+            file_contents = "\n".join(f.readlines())
+            if args == "fc":
+                file_contents = "```\n" + file_contents + "\n```"
+    else:
+        file_contents = args
+
     with open(PATH, "w+") as f:
-        f.write(args)
+        f.write(file_contents)
         f.write(weechat.buffer_get_string(buf, "input"))
 
     if run_externally:
@@ -123,7 +143,7 @@ def edit(data, buf, args):
 
 
 def main():
-    if not weechat.register("edit", "Keith Smiley", "1.0.3", "MIT",
+    if not weechat.register("edit", "Keith Smiley", __VERSION__, "MIT",
                             "Open your $EDITOR to compose a message", "", ""):
         return weechat.WEECHAT_RC_ERROR
 
