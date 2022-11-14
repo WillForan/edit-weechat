@@ -34,7 +34,7 @@ You can also bind <kbd>alt-e</kbd> to quickly edit whatever has been written so 
 Copy the script to `~/.weechat/python/autoload`
 
 ```
-mkdir -p ${XDG_DATA_HOME:-~/.config}/weechat/python/autoload/
+mkdir -p ${XDG_DATA_HOME:-~/.local/share}/weechat/python/autoload/
 wget https://raw.githubusercontent.com/WillForan/edit-weechat/master/edit.py $_
 ```
 
